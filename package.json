@@ -1,0 +1,14 @@
+{
+  "name": "compiler_assignments",
+  "version": "1.0.0",
+  "description": "编译原理作业代码",
+  "main": "index.js",
+  "scripts": {
+    "test": "coffee -c *.coffee && mocha;rm *.js"
+  },
+  "author": "yifan",
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^3.4.2"
+  }
+}
