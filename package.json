@@ -1,14 +1,26 @@
 {
-  "name": "compiler_assignments",
+  "name": "compiler_practices",
   "version": "1.0.0",
-  "description": "编译原理作业代码",
-  "main": "index.js",
+  "description": "编译原理练习&实践",
+  "main": "index.coffee",
   "scripts": {
-    "test": "coffee -c *.coffee && mocha;rm *.js"
+    "test": "mocha --compilers coffee:coffeescript/register"
   },
   "author": "yifan",
   "license": "ISC",
   "devDependencies": {
     "mocha": "^3.4.2"
-  }
+  },
+  "dependencies": {
+    "treeify": "^1.0.1",
+    "coffeescript": "^1.12.6"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "compiler",
+    "practices",
+    "assignments"
+  ]
 }
