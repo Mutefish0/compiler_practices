@@ -1,14 +1,19 @@
 ###
 功能
     采用预测分析法 （适用于同一个非终结符的各个产生式的First集合不相交） 
-    将包含`+`, `-`, 空格和单个数字的表达式翻译为后缀表达式 eg:
+    将包含`+`, `-`, `*`, `/`空格和单个数字的表达式翻译为后缀表达式 eg:
     2 + 5 - 7 -> 25+7-
 
 
-产生式                     语义规则
-    expr -> expr1 + term    expr.t = expr1.t + term.t + '+'
-          | expr1 - term    expr.t = expr1.t + term.t + '-'          
-          | term            expr.t = term.t
+产生式                       语义规则
+    expr -> expr1 + factor   expr.t = expr1.t + factor.t + '+'
+          | expr1 - factor   expr.t = expr1.t + factor.t + '-'          
+          | factor           expr.t = factor.t
+
+    
+ factor  -> factor * term
+          | factor / term
+          | term
 
     term -> 0               term.t = '0'         
           | 1               term.t = '1'
@@ -16,18 +21,25 @@
           | 9               term.t = '9'
 
 
-
 消除左递归
     令 
-    α = + term              α.t = term.t + '+'
-    β = - term              β.t = term.t + '-'   
-    γ = term 
+    α = + factor              α.t = factor.t + '+'
+    β = - factor              β.t = factor.t + '-'   
+    γ = factor 
     得
-    expr -> term rest       expr.t = term.t + rest.t     
+    expr -> factor rest       expr.t = factor.t + rest.t     
 
-    rest -> + term rest1    rest.t = term.t + '+' + rest1.t
-          | - term rest1    rest.t = term.t + '-' + rest1.t
-          | ε               rest.t = ''
+    rest -> + factor rest1    rest.t = α.t + rest1.t = factor.t + '+' + rest1.t
+          | - factor rest1    rest.t = β.t + rest1.t = factor.t + '-' + rest1.t
+          | ε                 rest.t = ''
+
+    同理得
+  factor -> term trest      factor.t = term.t + trest.t
+
+   trest -> * term trest1   trest.t = term.t + '*' + trest1.t
+          | / term trest1   trest.t = term.t + '/' + trest1.t
+          | ε
+
 ###
 
 predictiveParser = () -> 
@@ -35,9 +47,6 @@ predictiveParser = () ->
     @seq
     @matched
 
-    @eof = () ->
-        @seq[@lookahead] is undefined
-    
     @blank = () ->
         /\s/.test @seq[@lookahead]
 
@@ -51,20 +60,38 @@ predictiveParser = () ->
             true
         else
             false
+    
+    @eof = () ->
+        if @seq[@lookahead] is undefined
+            ''
+        else 
+            throw new Error "SyntaxtError"
+
+    @sourceSeq = () ->
+        @expr() + @eof()
 
     @expr = () -> 
-        @term() + @rest()
+        @factor() + @rest()
         
     @rest = () ->
         if @match '+'
-            @term() + '+' + @rest()
+            @factor() + '+' + @rest()
         else if @match '-'
-            @term() + '-' + @rest()
-        else  if @eof()
+            @factor() + '-' + @rest()
+        else 
             ''
-        else
-            throw new Error "SyntaxtError"
     
+    @factor = () ->
+        @term() + @trest()
+
+    @trest = () ->
+        if @match '*'
+            @term() + '*' + @trest()
+        else if @match '/'
+            @term() + '/' + @trest()
+        else 
+            ''
+
     @term = () ->
         if @match /[0-9]/
             @matched
@@ -73,7 +100,7 @@ predictiveParser = () ->
 
     @parse = (@seq) ->
         @lookahead = 0
-        @expr()
+        @sourceSeq()
 
     'Parser'
 
