@@ -13,10 +13,6 @@ node {
 ###
 
 class DFA
-    nodes: []
-    _nodeMap: null
-    _startNode: null
-
     constructor: (@nodes) ->
         @_nodeMap = new Map()
         for node in @nodes
