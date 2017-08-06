@@ -1,8 +1,8 @@
 assert = require 'assert'
 
 describe 'Predictive Parser', () ->
-    predictiveParser = require '../src/predictiveParser'
-    pprs = new predictiveParser()
+    PredictiveParser = require '../src/PredictiveParser'
+    pprs = new PredictiveParser()
     
     it 'should work in case with +, -', () ->
         assert.equal '13+2-', pprs.parse '1+3-2'
@@ -51,3 +51,6 @@ describe 'Predictive Parser', () ->
         assert.throws () ->
             pprs.parse '1 + + 2'
         , /SyntaxtError/
+
+
+module.exports = ''

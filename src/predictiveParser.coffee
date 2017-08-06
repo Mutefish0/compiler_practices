@@ -42,7 +42,7 @@
 
 ###
 
-predictiveParser = () -> 
+PredictiveParser = () -> 
     @lookahead
     @seq
     @matched
@@ -104,4 +104,4 @@ predictiveParser = () ->
 
     'Parser'
 
-module.exports = predictiveParser
+module.exports = PredictiveParser

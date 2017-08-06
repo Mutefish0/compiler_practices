@@ -4,7 +4,7 @@
   "description": "编译原理练习&实践",
   "main": "index.coffee",
   "scripts": {
-    "test": "mocha --compilers coffee:coffeescript/register"
+    "test": "mocha test/index.coffee --compilers coffee:coffeescript/register"
   },
   "author": "yifan",
   "license": "ISC",
@@ -12,8 +12,9 @@
     "mocha": "^3.4.2"
   },
   "dependencies": {
-    "treeify": "^1.0.1",
-    "coffeescript": "^1.12.6"
+    "coffeescript": "^1.12.6",
+    "randexp": "^0.4.5",
+    "treeify": "^1.0.1"
   },
   "directories": {
     "test": "test"
