@@ -1,10 +1,9 @@
 ###
-node {
+state {
     key: 's1',
     route: {
         'a': 's2',
         'b': 's3',
-        '': 's4'   # optional, go default
     },
     accepted:  # accepted state,  optional, true | false, default false 
     dead:  # dead state, optional, true | false, default false
@@ -13,19 +12,26 @@ node {
 ###
 
 class DFA
-    constructor: (@nodes) ->
-        @_nodeMap = new Map()
-        for node in @nodes
-            @_nodeMap.set node.key, node
-            if node.start
-                @_startNode = node
+    constructor: (@states) ->
+        if !@states.length 
+            throw Error 'No state found'
+        @_stateMap = new Map()
+        for state in @states
+            @_stateMap.set state.key, state
+            if state.start
+                @_startState = state
+        if !@_startState 
+            throw Error 'No starting state found'
 
     accepte: (str) ->
-        head = @_startNode
-        for p in [0..str.length - 1]
+        head = @_startState
+        for char in str
             if head.dead
                 return false
-            head = @_nodeMap.get head.route[str[p]] || head.route['']
+            head = @_stateMap.get head.route[char]
         !!head.accepted
+
+    toString: ->
+        @states
 
 module.exports = DFA

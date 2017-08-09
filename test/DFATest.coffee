@@ -3,7 +3,6 @@ assert = require 'assert'
 describe 'DFA', ->
     DFA = require '../src/common/DFA'
 
-
     test = (dfa, testCases) ->
          for testCase in testCases
             do (testCase) ->
@@ -33,7 +32,7 @@ describe 'DFA', ->
 
     describe 'Accepte all strings of `a`s and `b`s that d\'nt contain substring `abb`', ->
         dfa = new DFA [
-            { key: '0', start: true, accepted: true, route: 'a': '1', 'b': '0', '': '0'}
+            { key: '0', start: true, accepted: true, route: 'a': '1', 'b': '0' }
             { key: '1', accepted: true, route: 'a': '1', 'b': '2' }
             { key: '2', accepted: true, route: 'a': '1', 'b': '3' }
             { key: '3', dead: true }
