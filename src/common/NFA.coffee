@@ -14,8 +14,6 @@ state {
 ###
 
 
-
-
 class NFA
     constructor: (@states) ->
         if !@states.length 
