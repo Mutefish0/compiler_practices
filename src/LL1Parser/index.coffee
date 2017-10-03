@@ -88,20 +88,20 @@ class LL1Parser
         (@printProduction nonterm for nonterm in nonterminals).join '\n\n'
 
     # 消除立即左递归
-    #   input: A -> Aa | Ab | Ac | d | e 
+    #   input: A -> Aa | Ab | Ac | d | e
     #   output:
-    #       A -> dA' | eA' 
+    #       A -> dA' | eA'
     #       A' -> aA' | bA' | cA' | ε
     @_immedianteLeftRecusive: (nonterm) ->
         { tag, productions } = nonterm
         alphas = []
-        betas = [] 
+        betas = []
         for prod in productions
-            if prod[0] is tag 
+            if prod[0] is tag
                 alphas.push prod[1..]
-            else 
+            else
                 betas.push prod
-        if !alphas.length 
+        if !alphas.length
             return [nonterm]
         tagRest = "##{tag}#"
         [
@@ -110,7 +110,7 @@ class LL1Parser
                 productions: [...beta, tagRest] for beta in betas
             }
             {
-                tag: tagRest 
+                tag: tagRest
                 productions: ([...alpha, tagRest] for alpha in alphas).concat [['']]
             }
         ]
@@ -146,7 +146,7 @@ class LL1Parser
 
 
     _resolveLeftRecusive: ->
-        @_nonterms = LL1Parser._leftRecusive @_nonterms 
+        @_nonterms = LL1Parser._leftRecusive @_nonterms
 
     # 解析计算FIRST集所需的依赖
     _resolveDependence:  ->
@@ -157,7 +157,7 @@ class LL1Parser
                 for sym in prod
                     if @_prodsMap.has sym
                         set.add sym
-                    else 
+                    else
                         break
             @_firstDepMap.set nonterm.tag, set
 
@@ -166,15 +166,15 @@ class LL1Parser
         queue = [...@_tags]
         resolveMap = new Map()
 
-        depOk = (tag) => 
+        depOk = (tag) =>
             for dep from @_firstDepMap.get tag
-                if not resolveMap.has dep  
+                if not resolveMap.has dep
                     return false
             true
 
         resolve = (tag) =>
             set = new Set()
-            for prod in @_prodsMap.get tag 
+            for prod in @_prodsMap.get tag
                 for sym in [...prod, '$'] # 加入哨兵标记
                     # 如果是终结符，加入first集，遍历下一个产生式
                     if not @_prodsMap.has sym
@@ -191,17 +191,17 @@ class LL1Parser
                 set.delete '$'
                 set.add ''
             set
-                    
-            
+
+
         while queue.length
             tag = queue.pop()
             if resolveMap.has tag
                 continue
             if not depOk tag
-                queue.shift tag
+                queue.unshift tag
             else
                 resolveMap.set tag, resolve tag
-        
+
         @_firstSetMap = resolveMap
 
     _getFirstSet: (sym) ->
@@ -223,7 +223,7 @@ class LL1Parser
             set.delete '$'
             set.add ''
         set
-    
+
     # 寻找FOLLOW集
     _resolveFollowSets: ->
         followDepMap = new Map() # => Set
@@ -232,7 +232,7 @@ class LL1Parser
 
         reduceFirstSet = new Set()
         firstSet = null
-        
+
         for tag in @_tags
             followDepMap.set tag, new Set()
             partialMap.set tag, new Set()
@@ -244,22 +244,22 @@ class LL1Parser
                 reduceFirstSet.clear()
                 reduceFirstSet.add ''
                 for sym in prod by -1
-                    firstSet = @_getFirstSet sym 
+                    firstSet = @_getFirstSet sym
                     partial = partialMap.get sym
                     # 如果是非终结符
                     if @_prodsMap.has sym
 
                         for rf from reduceFirstSet when rf isnt ''
                             partial.add rf
-                        
+
                         if reduceFirstSet.has ''
                             followDepMap.get(sym).add tag
-                    
+
                     if not firstSet.has ''
                         reduceFirstSet.clear()
 
                     for f from firstSet
-                        reduceFirstSet.add f 
+                        reduceFirstSet.add f
         # 去掉对自己的依赖
         for dep from followDepMap
             followDepMap.get(dep[0]).delete dep[0]
@@ -267,22 +267,22 @@ class LL1Parser
         queue = [...@_tags]
         while queue.length
             tag = queue.pop()
-            if resolveMap.has tag 
+            if resolveMap.has tag
                 continue
-            
+
             partial = partialMap.get tag
             deps = followDepMap.get tag
 
             for dep from deps
-                if resolveMap.has dep 
+                if resolveMap.has dep
                     for rd from resolveMap.get dep
                         partial.add rd
-                    deps.delete dep 
+                    deps.delete dep
 
             if deps.size is 0
                 resolveMap.set tag, partial
             else
-                queue.unshift tag 
+                queue.unshift tag
 
         @_followSetMap = resolveMap
 
@@ -295,16 +295,16 @@ class LL1Parser
                 first = @_getFirstSetBySeq prod
                 for f from first when f isnt ''
                     # 存在重复的条目
-                    if table[tag][f] 
+                    if table[tag][f]
                         throw Error 'SyntaxtError: incorrect LL(1) gramer'
-                    else 
+                    else
                         table[tag][f] = tag: tag, production: prod
                 if first.has ''
                     follow = @_getFollowSet tag
                     for f from follow
                         if table[tag][f]
                             throw Error 'SyntaxtError: incorrect LL(1) gramer'
-                        else    
+                        else
                             table[tag][f] = tag: tag, production: prod
         @_table = table
 
@@ -313,7 +313,7 @@ class LL1Parser
         stack = ['$', @_startTag]
         token = lexer.nextToken()
         parseStack = [[token]]
-        
+
         while stack.length
             head = stack.pop()
 
@@ -331,16 +331,16 @@ class LL1Parser
                 if token.tag isnt '$'
                     parseStack[parseStack.length - 1].push token
 
-            else 
+            else
                 prod = @_table[head][token.tag]
                 if not prod
                     throw Error 'SyntaxtError: parse error'
                 stack.push '$$'
                 parseStack.push []
-                for sym in prod.production by -1 
+                for sym in prod.production by -1
                     stack.push sym
 
         parseStack[0]
-    
+
 
 module.exports = LL1Parser
